@@ -13,7 +13,7 @@ class Vertex(object):
         self.point_list = []
 
     def __repr__(self):
-        return '({0:.1f},{1:.1f})'.format(self.x, self.y)
+        return '({0:.2f},{1:.2f})'.format(self.x, self.y)
 
 
 class Line(object):
@@ -36,27 +36,39 @@ def intersect(l1, l2):
 
     y_num = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)
     y_den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+
     if x_den != 0 and y_den != 0:
         x_coor = x_num / x_den
         y_coor = y_num / y_den
 
-        if (x_coor - x1) * (y2 - y1) == (x2 - x1) * (y_coor - y1) and min(x1, x2) <= x_coor <= max(x1, x2) and min(y1,
-                                                                                                                   y2) <= y_coor <= max(
+        if min(x1, x2) <= x_coor <= max(x1, x2) and min(y1,
+                                                        y2) <= y_coor <= max(
             y1, y2):
-            if (x_coor - x3) * (y4 - y3) == (x4 - x3) * (y_coor - y3) and min(x3, x4) <= x_coor <= max(x3, x4) and min(
+            if min(x3, x4) <= x_coor <= max(x3, x4) and min(
                     y3, y4) <= y_coor <= max(y3, y4):
                 return Vertex(x_coor, y_coor)
     else:
         return None
 
 
-def ontheline(i, j, q):
-    if (q.x - i.x) * (j.y - i.y) == (j.x - i.x) * (q.y - i.y) and min(i.x, j.x) <= q.x <= max(i.x, j.x) and min(i.y,
-                                                                                                                j.y) <= q.y <= max(
-        i.y, j.y):
-        return 1
+# def ontheline(i, j, q):
+#     if (q.x - i.x) * (j.y - i.y) == (j.x - i.x) * (q.y - i.y) and min(i.x, j.x) <= q.x <= max(i.x, j.x) and min(i.y,
+#                                                                                                                 j.y) <= q.y <= max(
+#         i.y, j.y):
+#         return 1
+#     else:
+#         pass
+
+def overlap(l1, l2):
+    l1a = l1.src.y - l1.dst.y
+    l1b = l1.dst.x - l1.src.x
+    l2a = l2.src.y - l2.dst.y
+    l2b = l2.dst.x - l2.src.x
+    d = l1a * l2b - l2a * l1b
+    if d == 0:
+        return True
     else:
-        pass
+        return False
 
 
 def get_streetname(command):
@@ -173,15 +185,15 @@ def generate(streets):
     else:
         print('Error: the set is empty')
 
-    # print(street_name)
-
     vertices_list = []
-    line_list = []
 
-    # index_list = []
     edge_list = []
 
     intersection_list = []
+
+    overlap_list = []
+
+    intersection_dict = {}
 
     for i in range(len(street_name) - 1):
         for j in range(i + 1, len(street_name)):
@@ -193,23 +205,25 @@ def generate(streets):
                 for l2 in s2:
                     intersection = intersect(l1, l2)
                     # print(intersection)
+                    endpoint1 = l1.dst
+                    endpoint2 = l1.src
+                    endpoint3 = l2.dst
+                    endpoint4 = l2.src
+
+                    # print(endpoint1, endpoint2, endpoint3, endpoint4)
+
+                    endpoint_list = [endpoint1, endpoint2, endpoint3, endpoint4]
 
                     # add the endpoints of lines have intersections
                     if intersection is not None:
                         # print(l1, l2)
+                        intersection_dict.setdefault(intersection, []).append(l2)
+                        intersection_dict.setdefault(intersection, []).append(l1)
+
                         if not str(intersection) in intersection_list:
                             intersection_list.append(intersection)
                         else:
                             pass
-
-                        endpoint1 = l1.dst
-                        endpoint2 = l1.src
-                        endpoint3 = l2.dst
-                        endpoint4 = l2.src
-
-                        # print(endpoint1, endpoint2, endpoint3, endpoint4)
-
-                        endpoint_list = [endpoint1, endpoint2, endpoint3, endpoint4]
 
                         for p in endpoint_list:
 
@@ -230,6 +244,43 @@ def generate(streets):
                             vertices[v_id] = intersection
                             vertices_list.append(str(intersection))
 
+                    elif overlap(l1, l2):
+                        overlap_list.append(l2)
+                        overlap_list.append(l1)
+
+                        for i in range(len(endpoint_list) - 1):
+                            for j in range(i, len(endpoint_list)):
+                                if endpoint_list[i].x == endpoint_list[j].x:
+                                    if endpoint_list[i].y > endpoint_list[j].y:
+                                        c = endpoint_list[i]
+                                        endpoint_list[i] = endpoint_list[j]
+                                        endpoint_list[j] = c
+                                elif endpoint_list[i].x > endpoint_list[j].x:
+                                    c = endpoint_list[i]
+                                    endpoint_list[i] = endpoint_list[j]
+                                    endpoint_list[j] = c
+                                else:
+                                    pass
+
+                        sorted_list = endpoint_list
+
+                        for li in sorted_list:
+                            if str(li) not in vertices_list:
+                                vertices_list.append(str(li))
+                                v_id = v_id + 1
+                                vertices[v_id] = str(li)
+
+                        if str(sorted_list[1]) not in intersection_list:
+                            intersection_list.append(sorted_list[1])
+
+                        if str(sorted_list[2]) not in intersection_list:
+                            intersection_list.append(sorted_list[2])
+
+                        intersection_dict.setdefault(sorted_list[1], []).append(l2)
+                        intersection_dict.setdefault(sorted_list[1], []).append(l1)
+                        intersection_dict.setdefault(sorted_list[2], []).append(l2)
+                        intersection_dict.setdefault(sorted_list[2], []).append(l1)
+
     print('V={')
 
     for key in vertices:
@@ -238,6 +289,16 @@ def generate(streets):
     print('}')
 
     # generate edges
+    for i in range(len(intersection_list) - 1):
+        for j in range(i + 1, len(intersection_list)):
+            if intersection_list[j].x < intersection_list[i].x:
+                c = intersection_list[j]
+                intersection_list[j] = intersection_list[i]
+                intersection_list[i] = c
+            elif intersection_list[j].y < intersection_list[i].y:
+                c = intersection_list[j]
+                intersection_list[j] = intersection_list[i]
+                intersection_list[i] = c
 
     for k in range(len(street_name)):
         s = streets[street_name[k]]
@@ -246,39 +307,42 @@ def generate(streets):
             end1 = line.src
             end2 = line.dst
 
-            # print (end1)
+            if end1.x > end2.x:
+                c = end1
+                end1 = end2
+                end2 = c
+            elif end1.y > end2.y:
+                c = end1
+                end1 = end2
+                end2 = c
+            else:
+                pass
 
             print_list = []
 
             for inter in intersection_list:
                 # print(line)
-                if ontheline(end1, end2, inter):
-                    # print(end1)
+                i_value = intersection_dict[inter]
+                for value in i_value:
+                    if value == line:
+                        # print(end1)
 
-                    if str(end1) not in print_list:
-                        print_list.append(str(end1))
+                        if str(end1) not in print_list:
+                            print_list.append(str(end1))
 
-                    if str(inter) not in print_list:
-                        print_list.append(str(inter))
+                        if str(inter) not in print_list:
+                            print_list.append(str(inter))
 
             if str(end2) not in print_list:
                 print_list.append(str(end2))
-
-            # print(print_list)
 
             for m in range(len(print_list) - 1):
                 l = Line(print_list[m], print_list[m + 1])
                 # print(l)
                 if str(l) not in edge_list:
+
                     edge_list.append(l)
 
-    # for key, value in vertices.items():
-    #     index_list.append(key)
-
-    # print('index',index_list)
-
-    # def get_index(vertices, value):
-    #     return (k for k, v in vertices.items() if v == value)
 
     new_vertices = {str(v): k for k, v in vertices.items()}
     # print(new_vertices)
@@ -290,7 +354,7 @@ def generate(streets):
     for edge in edge_list:
         index_a = new_vertices[edge.src]
         index_b = new_vertices[edge.dst]
-        cnt = cnt+1
+        cnt = cnt + 1
         if cnt < len(edge_list):
             print(str('<') + str(index_a) + str(',') + str(index_b) + str('>') + str(','))
         else:
@@ -299,19 +363,13 @@ def generate(streets):
 
 
 def main():
-    ### YOUR MAIN CODE GOES HERE
 
-    ### sample code to read from stdin.
-
-    ### make sure to remove all spurious print statements as required
-
-    ### by the assignment
     init_streets = {}
     streets = {}
 
     while True:
         try:
-            command = raw_input('Please input your command:')  # python3 input
+            command = raw_input().lower()  # python3 input
 
             key = get_streetname(command)
 
@@ -351,8 +409,6 @@ def main():
                 else:
                     print('Error: this street does not exsit, try again')
 
-                # print(streets)
-
 
             elif command[0] == 'r':
                 # print('remove')
@@ -372,10 +428,9 @@ def main():
             else:
                 print('Error: The format of input is wrong.')
 
-        # return exit code 0 on successful termination
         except EOFError:
             sys.exit(0)
-            # print('Finished reading input')
+
 
 
 if __name__ == '__main__':
