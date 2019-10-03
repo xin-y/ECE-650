@@ -36,7 +36,6 @@ def intersect(l1, l2):
 
     y_num = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)
     y_den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
-
     if x_den != 0 and y_den != 0:
         x_coor = x_num / x_den
         y_coor = y_num / y_den
@@ -51,13 +50,13 @@ def intersect(l1, l2):
         return None
 
 
-# def ontheline(i, j, q):
-#     if (q.x - i.x) * (j.y - i.y) == (j.x - i.x) * (q.y - i.y) and min(i.x, j.x) <= q.x <= max(i.x, j.x) and min(i.y,
-#                                                                                                                 j.y) <= q.y <= max(
-#         i.y, j.y):
-#         return 1
-#     else:
-#         pass
+def ontheline(i, j, q):
+    if (q.x - i.x) * (j.y - i.y) == (j.x - i.x) * (q.y - i.y) and min(i.x, j.x) <= q.x <= max(i.x, j.x) and min(i.y,
+                                                                                                                j.y) <= q.y <= max(
+        i.y, j.y):
+        return 1
+    else:
+        pass
 
 def overlap(l1, l2):
     l1a = l1.src.y - l1.dst.y
@@ -205,14 +204,6 @@ def generate(streets):
                 for l2 in s2:
                     intersection = intersect(l1, l2)
                     # print(intersection)
-                    endpoint1 = l1.dst
-                    endpoint2 = l1.src
-                    endpoint3 = l2.dst
-                    endpoint4 = l2.src
-
-                    # print(endpoint1, endpoint2, endpoint3, endpoint4)
-
-                    endpoint_list = [endpoint1, endpoint2, endpoint3, endpoint4]
 
                     # add the endpoints of lines have intersections
                     if intersection is not None:
@@ -224,6 +215,15 @@ def generate(streets):
                             intersection_list.append(intersection)
                         else:
                             pass
+
+                        endpoint1 = l1.dst
+                        endpoint2 = l1.src
+                        endpoint3 = l2.dst
+                        endpoint4 = l2.src
+
+                        # print(endpoint1, endpoint2, endpoint3, endpoint4)
+
+                        endpoint_list = [endpoint1, endpoint2, endpoint3, endpoint4]
 
                         for p in endpoint_list:
 
