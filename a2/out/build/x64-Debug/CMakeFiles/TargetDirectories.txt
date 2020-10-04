@@ -1,0 +1,4 @@
+D:/UW/ece650/a2/x22yi/out/build/x64-Debug/CMakeFiles/ece650-a2.dir
+D:/UW/ece650/a2/x22yi/out/build/x64-Debug/CMakeFiles/tests.dir
+D:/UW/ece650/a2/x22yi/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+D:/UW/ece650/a2/x22yi/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
