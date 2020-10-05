@@ -20,7 +20,7 @@ using namespace Minisat;
 
 #define INFINITY 200000
 
-std::vector<int> find_vertexcover(int, vector<int>, int);
+vector<int> find_vertexcover(int, vector<int>, int);
 void CNF_SAT_VC(int, vector<int>);
 void APPROCX_VC_1(int, vector<int>);
 void APPROCX_VC_2(int, vector<int>);
@@ -111,7 +111,7 @@ void* threadAPPROX_VC_2(void* arg) {
 	double duration;
 
 	start = clock();
-	APPROCX_VC_2(std::ref(vertex_num), std::ref(vec_E));
+	APPROCX_VC_2(ref(vertex_num), ref(vec_E));
 	finish = clock();
 
 	duration = (double)(finish - start)/CLOCKS_PER_SEC;
@@ -122,7 +122,7 @@ void* threadAPPROX_VC_2(void* arg) {
 void APPROCX_VC_2(int vertex_num, vector<int>edge) {
 
 	//std::vector<int> output_2;
-	std::vector<int> new_edge = edge;
+	vector<int> new_edge = edge;
 
 
 	while (!edge.empty()) {
